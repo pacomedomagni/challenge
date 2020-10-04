@@ -78,6 +78,7 @@ class Pacman extends Item implements GameBoardItem {
     const item = this.items[piece.y][piece.x];
     if (typeof item !== 'undefined') {
       this.score += item.type;
+      //console.log(item.type)
       switch(item.type) {
         case GameBoardItemType.PILL:
           this.pillTimer.timer = pillMax;
@@ -95,6 +96,80 @@ class Pacman extends Item implements GameBoardItem {
     this.setPiece(piece, direction);
     this.items[piece.y][piece.x] = this;
   }
+
+    /**
+   * get highest score according to the direction of Pacman
+   * so We know Ghost > Pill > Biscuit
+   * 
+   * @method getAutoScore
+   */
+
+  getAutoScore(desiredDirection: string, reverseDirection: string): number {
+
+    let currentScore = -1;
+    const { moves } = this.piece;
+
+    // Check first if out next move is not behind us
+    if( this.direction !== GameDirectionMap[reverseDirection] ){
+      
+      if( moves[desiredDirection] ){
+        const desireMove = moves[desiredDirection];
+        
+
+        if (this.pillTimer.timer > 0 && this.items[desireMove.y][desireMove.x].type === GameBoardItemType.GHOST){
+          currentScore +=3;
+        }
+        if( this.items[desireMove.y][desireMove.x].type !== GameBoardItemType.GHOST ) {
+          // console.log('here'+this.items[desireMove.y][desireMove.x].type)
+          currentScore = 1;
+        }
+        
+        if( this.items[desireMove.y][desireMove.x].type === GameBoardItemType.BISCUIT ) {
+          // console.log(this.items[desireMove.y][desireMove.x].type)
+          currentScore +=1;
+        }
+       
+        if( this.items[desireMove.y][desireMove.x].type === GameBoardItemType.PILL ) {
+          currentScore +=2;
+        }
+      }
+    }
+
+    return currentScore;
+
+  }
+  /**
+   * @method getAutoMove
+   * @return next move
+   * the goal is to maximized the score on the Auto play.
+   * for that for each move I check the item that surround pacman either empty space, biscuit, pill or wall
+   * and those items are rank for they score. So which ever item with the highest score will win the move.
+   * If multiple direction have the same score the first item checked will win the move.
+   */
+
+  getAutoMove(): GameBoardItemMove | boolean {
+    const {moves} = this.piece;
+    const autoDirections = ['down','up','right','left'];
+    const autoReverseDirections = ['up','down','left','right'];
+    let maximumScore = 0, desiredDirection = '';
+
+    if(moves){
+      for(let currentDirection = 0; currentDirection < 4; currentDirection++){
+        const currentScore = this.getAutoScore(autoDirections[currentDirection], autoReverseDirections[currentDirection]);
+        if(currentScore > maximumScore){
+          desiredDirection = autoDirections[currentDirection];
+          maximumScore = currentScore;
+        }
+      }
+    }
+    if(desiredDirection !==''){
+      return {piece: moves[desiredDirection],direction:GameDirectionMap[desiredDirection]};
+    }else{
+      return false
+    }
+  }
+
+
 
 }
 

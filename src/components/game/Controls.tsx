@@ -3,7 +3,8 @@ import Button from '@material-ui/core/Button';
 import { Typography } from '@material-ui/core';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import store from '../../redux/store';
-import { initGame, resetScore } from '../../redux/actions';
+import { initGame, resetScore, startAutoGame
+} from '../../redux/actions';
 
 interface ControlProps {
   score?: number;
@@ -29,6 +30,9 @@ const Controls: React.FC<ControlProps> = ({score, iteration, runningScore}): JSX
   const handleNewGame = ():void => {
     store.dispatch(initGame());
   };
+  const handleAutoPlay = ():void =>{
+    store.dispatch(startAutoGame());
+  }
 
   const handleResetScore = ():void => {
     store.dispatch(resetScore());
@@ -55,6 +59,7 @@ const Controls: React.FC<ControlProps> = ({score, iteration, runningScore}): JSX
       </div>
 
       <Button onClick={handleNewGame} className={styles.button} fullWidth color="primary" variant="contained">New Game</Button>
+      <Button onClick={handleAutoPlay} className={styles.button} fullWidth color="primary" variant="contained">Auto Play</Button>
       <Button onClick={handleResetScore} className={styles.button} fullWidth variant="contained">Reset Score</Button>
     </>
   );
